@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "8bbca61e-19bf-4541-b84e-28b3c66f54c3",
+		"name": "Cloud Native RabbitMQ Email System",
+		"description": "Collection of requests to test the Sender Service API and health endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Send Email",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"to\": \"client@example.com\",\n    \"subject\": \"Welcome\",\n    \"message\": \"Hello from RabbitMQ!\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/email/send",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"email",
+						"send"
+					]
+				},
+				"description": "Send email payload to producer queue."
+			},
+			"response": []
+		},
+		{
+			"name": "Sender Service Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"health"
+					]
+				},
+				"description": "Check health of the Sender Service."
+			},
+			"response": []
+		},
+		{
+			"name": "Email Service Health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3001/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"health"
+					]
+				},
+				"description": "Check health of the Email Service."
+			},
+			"response": []
+		}
+	]
+}

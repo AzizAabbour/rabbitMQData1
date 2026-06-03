@@ -1,0 +1,66 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.0-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  sender-service:
+    build:
+      context: ./sender-service
+      dockerfile: Dockerfile
+    container_name: sender-service
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - sender_logs:/app/logs
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    container_name: email-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      # Update these placeholders or use a local .env file to override them
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_SECURE: "false"
+      MAIL_USER: your_email@gmail.com
+      MAIL_PASS: your_app_password
+      MAIL_FROM: your_email@gmail.com
+      RETRY_MAX_ATTEMPTS: 3
+      RETRY_DELAY_MS: 2000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - email_logs:/app/logs
+
+volumes:
+  rabbitmq_data:
+  sender_logs:
+  email_logs:
