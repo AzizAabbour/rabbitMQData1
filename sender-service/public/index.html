@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Service d'Envoi d'E-mails - Cloud Native</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #1e293b;
+      --primary: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --success: #10b981;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn {
+      width: 100%;
+      background-color: var(--primary);
+      color: #0b0f19;
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background-color: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* History list styling */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .history-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .history-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    .history-item {
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 15px;
+      transition: border-color 0.2s ease;
+    }
+
+    .history-item:hover {
+      border-color: var(--primary);
+    }
+
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history-item-to {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .history-item-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .history-item-subject {
+      font-size: 0.95rem;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+
+    .history-item-body {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .no-history {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px 0;
+      font-style: italic;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--success);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Envoi d'E-mails Asynchrones</h1>
+    <p>Architecture Cloud Native avec RabbitMQ et Microservices</p>
+  </header>
+
+  <div class="container">
+    <!-- Form Card -->
+    <div class="card">
+      <h2>Nouveau Message</h2>
+      <form id="emailForm">
+        <div class="form-group">
+          <label for="to">Destinataire (E-mail)</label>
+          <input type="email" id="to" class="form-control" placeholder="destinataire@exemple.com" required>
+        </div>
+        <div class="form-group">
+          <label for="subject">Objet</label>
+          <input type="text" id="subject" class="form-control" placeholder="Sujet de votre e-mail" required>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" class="form-control" placeholder="Écrivez votre message ici..." required></textarea>
+        </div>
+        <button type="submit" id="submitBtn" class="btn">
+          <span>Envoyer le Message</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- History Card -->
+    <div class="card">
+      <h2>Historique des Messages Envoyés</h2>
+      <div id="historyContainer" class="history-list">
+        <div class="no-history">Aucun message envoyé pour le moment.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">E-mail ajouté à la file d'attente !</div>
+
+  <script>
+    const emailForm = document.getElementById('emailForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const historyContainer = document.getElementById('historyContainer');
+    const toast = document.getElementById('toast');
+
+    // Fetch and display history
+    async function loadHistory() {
+      try {
+        const response = await fetch('/api/email/history');
+        const data = await response.json();
+        
+        if (data.length === 0) {
+          historyContainer.innerHTML = '<div class="no-history">Aucun message envoyé pour le moment.</div>';
+          return;
+        }
+
+        historyContainer.innerHTML = data.map(item => {
+          const dateStr = new Date(item.timestamp).toLocaleString('fr-FR');
+          return `
+            <div class="history-item">
+              <div class="history-item-header">
+                <span class="history-item-to">${escapeHtml(item.to)}</span>
+                <span class="history-item-time">${dateStr}</span>
+              </div>
+              <div class="history-item-subject">${escapeHtml(item.subject)}</div>
+              <div class="history-item-body">${escapeHtml(item.message)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'historique:', error);
+      }
+    }
+
+    // Submit handler
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const to = document.getElementById('to').value;
+      const subject = document.getElementById('subject').value;
+      const message = document.getElementById('message').value;
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Publication...';
+
+      try {
+        const response = await fetch('/api/email/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ to, subject, message })
+        });
+
+        if (response.ok) {
+          showToast();
+          emailForm.reset();
+          await loadHistory();
+        } else {
+          alert('Erreur lors de l\'envoi. Veuillez réessayer.');
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur de connexion au serveur.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Envoyer le Message';
+      }
+    });
+
+    // Helper functions
+    function showToast() {
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Initial load and periodic refresh
+    loadHistory();
+    setInterval(loadHistory, 5000);
+  </script>
+</body>
+</html>

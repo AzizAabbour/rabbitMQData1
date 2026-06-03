@@ -9,6 +9,11 @@ const logger = require('../utils/logger');
  * (correlation ID, timestamp), and delegates publishing to the producer.
  */
 class EmailService {
+  constructor() {
+    this.history = [];
+    this.maxHistory = 50;
+  }
+
   /**
    * Queue an email for asynchronous delivery.
    *
@@ -35,6 +40,12 @@ class EmailService {
 
     await producer.publishMessage(message);
 
+    // Save to in-memory history
+    this.history.unshift(message);
+    if (this.history.length > this.maxHistory) {
+      this.history.pop();
+    }
+
     logger.info('Email queued successfully', { correlationId });
 
     return {
@@ -42,6 +53,14 @@ class EmailService {
       message: 'Email added to queue',
       requestId: correlationId,
     };
+  }
+
+  /**
+   * Retrieve the queued email history.
+   * @returns {Array} Array of email messages.
+   */
+  getHistory() {
+    return this.history;
   }
 }
 

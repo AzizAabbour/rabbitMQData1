@@ -18,16 +18,16 @@ const router = express.Router();
  *         to:
  *           type: string
  *           format: email
- *           description: Recipient email address
+ *           description: Adresse e-mail du destinataire
  *           example: client@example.com
  *         subject:
  *           type: string
- *           description: Email subject line
- *           example: Welcome
+ *           description: Objet du message
+ *           example: Bienvenue
  *         message:
  *           type: string
- *           description: Email message body
- *           example: Hello from RabbitMQ
+ *           description: Corps du message e-mail
+ *           example: Bonjour de RabbitMQ
  *     EmailResponse:
  *       type: object
  *       properties:
@@ -36,7 +36,7 @@ const router = express.Router();
  *           example: true
  *         message:
  *           type: string
- *           example: Email added to queue
+ *           example: E-mail ajouté à la file d'attente
  *         requestId:
  *           type: string
  *           format: uuid
@@ -74,9 +74,9 @@ const router = express.Router();
  * @swagger
  * /api/email/send:
  *   post:
- *     summary: Queue an email for asynchronous delivery
- *     description: Validates the request, generates a correlation ID, and publishes the message to RabbitMQ.
- *     tags: [Email]
+ *     summary: Ajouter un e-mail à la file d'attente d'envoi
+ *     description: Valide la requête, génère un ID de corrélation et publie le message sur RabbitMQ.
+ *     tags: [E-mail]
  *     requestBody:
  *       required: true
  *       content:
@@ -85,32 +85,51 @@ const router = express.Router();
  *             $ref: '#/components/schemas/EmailRequest'
  *     responses:
  *       202:
- *         description: Email accepted and queued
+ *         description: E-mail accepté et mis en file d'attente
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/EmailResponse'
  *       400:
- *         description: Validation error
+ *         description: Erreur de validation des données
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
- *         description: Internal server error
+ *         description: Erreur interne du serveur
  */
 router.post('/send', validateEmail, emailController.sendEmail);
 
 /**
  * @swagger
- * /health:
+ * /api/email/history:
  *   get:
- *     summary: Health check endpoint
- *     description: Returns the health status of the Sender Service and its RabbitMQ connection.
- *     tags: [Health]
+ *     summary: Récupérer l'historique des e-mails envoyés (mémoire)
+ *     description: Retourne la liste des e-mails récemment envoyés ou mis en file d'attente.
+ *     tags: [E-mail]
  *     responses:
  *       200:
- *         description: Service is healthy
+ *         description: Liste de l'historique récupérée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/EmailResponse'
+ */
+router.get('/history', emailController.getHistory);
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Vérification de l'état du service (Santé)
+ *     description: Retourne l'état de santé du service d'envoi et de sa connexion à RabbitMQ.
+ *     tags: [Santé]
+ *     responses:
+ *       200:
+ *         description: Le service est en bonne santé
  *         content:
  *           application/json:
  *             schema:

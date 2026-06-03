@@ -8,22 +8,22 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Sender Service API',
+      title: 'API Service d\'Envoi d\'E-mails',
       version: '1.0.0',
       description:
-        'REST API for the Email Sender Service. Accepts email requests and publishes them to RabbitMQ for asynchronous delivery.',
+        'API REST pour le Service d\'Envoi d\'E-mails. Reçoit les requêtes d\'envoi et les publie dans RabbitMQ pour un traitement asynchrone et fiable.',
       contact: {
-        name: 'Cloud Native Team',
+        name: 'Équipe Cloud Native',
       },
       license: {
-        name: 'MIT',
+        name: 'Licence MIT',
         url: 'https://opensource.org/licenses/MIT',
       },
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Local Development',
+        description: 'Serveur de Développement Local',
       },
     ],
   },

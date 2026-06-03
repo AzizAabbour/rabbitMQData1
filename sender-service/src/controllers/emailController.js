@@ -25,6 +25,20 @@ class EmailController {
   }
 
   /**
+   * GET /api/email/history
+   *
+   * Returns a list of recently queued messages.
+   */
+  async getHistory(_req, res, next) {
+    try {
+      const history = emailService.getHistory();
+      return res.status(200).json(history);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /health
    *
    * Simple liveness probe for Docker and orchestration health checks.
